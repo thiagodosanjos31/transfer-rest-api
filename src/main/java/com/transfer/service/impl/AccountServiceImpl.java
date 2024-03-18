@@ -44,9 +44,16 @@ public class AccountServiceImpl implements AccountService {
             return balance - value > 0.0;
         }
 
-        public void updateBalances(TransferDTO transferData) {
-            Balance balanceFromRollback = updateBalanceFrom(transferData);
-            updateBalanceTo(transferData, balanceFromRollback);
+        public void updateBalances(TransferDTO transferData) throws InterruptedException {
+            Runnable task = () -> {
+                Balance balanceFromRollback = updateBalanceFrom(transferData);
+                try {
+                    updateBalanceTo(transferData, balanceFromRollback);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+            Thread.ofVirtual().start(task);
         }
 
         private Balance updateBalanceFrom(TransferDTO transferData) {
@@ -57,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
             return accountRepository.save(balanceAccountFrom);
         }
 
-        private void updateBalanceTo(TransferDTO transferData, Balance balanceFromRollback) {
+        private void updateBalanceTo(TransferDTO transferData, Balance balanceFromRollback) throws InterruptedException {
             Balance balanceAccountTo = accountRepository.findByAccountId(transferData.getAccountTo());
             Double value = transferData.getValue();
             balanceAccountTo.addBalance(value);
@@ -66,8 +73,8 @@ public class AccountServiceImpl implements AccountService {
             }catch (CassandraConnectionFailureException | CassandraInternalException exception){
                 log.error("Update failed. AccountFrom: {} AccountTo: {} Value: {}",
                         transferData.getAccountFrom(), transferData.getAccountTo(), transferData.getValue());
-                balanceFromRollback.addBalance(value);
-                accountRepository.save(balanceFromRollback);
+                balanceFromRollback.addBalance(value);accountRepository.save(balanceFromRollback);
+
             }
         }
 }

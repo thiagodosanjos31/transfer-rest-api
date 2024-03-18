@@ -22,13 +22,17 @@ public class CentralBankServiceImpl implements CentralBankService {
     }
 
 
-    public void callCentralBank(CentralBankDto centralBankDto) {
+    public void callCentralBank(CentralBankDto centralBankDto) throws InterruptedException {
         logger.info("method=callCentralBank, message=Init send message abount transfer between accounts to central bank.");
-        try {
-            centralBankClient.sendInformationForCentralBank(centralBankDto.toClient());
-        } catch (Exception exception) {
-            sendMessageService.sendToTopic(centralBankDto.toClient());
-            logger.error("Error to send information to Central Bank.");
-        }
+        Runnable task = () -> {
+            try {
+                centralBankClient.sendInformationForCentralBank(centralBankDto.toClient());
+            } catch (Exception exception) {
+                sendMessageService.sendToTopic(centralBankDto.toClient());
+                logger.error("Error to send information to Central Bank.");
+            }
+        };
+        Thread.ofVirtual().start(task);
+
     }
 }

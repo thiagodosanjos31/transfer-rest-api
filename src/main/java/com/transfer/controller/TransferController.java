@@ -32,6 +32,8 @@ public class TransferController {
      * 8. Explorar Design patterns;
      * 9. Implementar padrões de resiliência na aplicação.
      *
+     *
+     * 600 requisições por segundo / seria necessário 10 pods para aguentar
      */
 
     private final Logger logger = LoggerFactory.getLogger(TransferController.class);
@@ -44,7 +46,7 @@ public class TransferController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<String> transferBetweenAccounts(@RequestBody TransferDTO transferData) {
+    public ResponseEntity<String> transferBetweenAccounts(@RequestBody TransferDTO transferData) throws InterruptedException {
         logger.info("method=transferBetweenAccounts, message=Init transfer value between accounts.");
         transferValidationService.validation(transferData);
         transferService.transfer(transferData);

@@ -24,7 +24,7 @@ public class TransferServiceImpl implements TransferService {
     }
 
     @Override
-    public void transfer(TransferDTO transferDTO) {
+    public void transfer(TransferDTO transferDTO) throws InterruptedException {
         logger.info("method=transfer, message=Init transfer value between accounts");
         if(accountService.thereIsBalanceAvailable(transferDTO.getAccountFrom(), transferDTO.getValue())){
             accountService.updateBalances(transferDTO);
