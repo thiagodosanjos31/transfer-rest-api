@@ -13,3 +13,12 @@ services:
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+  spring_cassandra:
+    container_name: spring_cassandra
+    image: cassandra:4.0.7
+    ports:
+      - 9042:9042
+    volumes:
+          - ./data/cass1:/var/lib/cassandra    # This is the volume that will persist data for cass1 node
+          - ./etc/cass1:/etc/cassandra   # Use your own config files for full control
+          

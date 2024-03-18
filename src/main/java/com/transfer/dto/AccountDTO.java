@@ -6,4 +6,9 @@ import lombok.Data;
 public class AccountDTO {
     private String accountId;
     private String status;
+
+    public AccountDTO(String accountId, String status) {
+        this.accountId = accountId;
+        this.status = status;
+    }
 }
